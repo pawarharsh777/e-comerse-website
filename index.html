@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thread & Timber Shop</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+      :root {
+        --ink: #18202b;
+        --muted: #647081;
+        --line: #dfe5eb;
+        --paper: #fff8cf;
+        --panel: #ffffff;
+        --brand: #0e7c74;
+        --brand-dark: #075c56;
+        --accent: #d94f38;
+        --gold: #f4b942;
+        --shadow: 0 18px 45px rgba(24, 32, 43, 0.13);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .app {
+        min-height: 100vh;
+      }
+
+      .topbar {
+        background: #10202f;
+        color: #eef7f6;
+        font-size: 0.86rem;
+        padding: 0.55rem 1rem;
+        text-align: center;
+      }
+
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: grid;
+        grid-template-columns: auto minmax(180px, 1fr) auto;
+        gap: 1rem;
+        align-items: center;
+        padding: 1rem clamp(1rem, 4vw, 4rem);
+        background: rgba(251, 252, 253, 0.94);
+        border-bottom: 1px solid var(--line);
+        backdrop-filter: blur(14px);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        font-weight: 850;
+        letter-spacing: 0;
+        white-space: nowrap;
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 38px;
+        height: 38px;
+        place-items: center;
+        border-radius: 8px;
+        color: white;
+        background: var(--brand);
+        box-shadow: 0 8px 22px rgba(14, 124, 116, 0.24);
+      }
+
+      .search {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        width: min(560px, 100%);
+        margin: 0 auto;
+        padding: 0.55rem 0.75rem;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+      }
+
+      .search input {
+        width: 100%;
+        border: 0;
+        outline: 0;
+        color: var(--ink);
+      }
+
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .icon-btn,
+      .cart-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 42px;
+        min-width: 42px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        color: var(--ink);
+        background: white;
+      }
+
+      .cart-btn {
+        gap: 0.5rem;
+        padding: 0 0.8rem;
+        font-weight: 750;
+      }
+
+      .cart-count {
+        display: grid;
+        min-width: 24px;
+        height: 24px;
+        place-items: center;
+        border-radius: 999px;
+        color: white;
+        background: var(--accent);
+        font-size: 0.8rem;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
+        gap: clamp(1.5rem, 4vw, 4rem);
+        align-items: center;
+        padding: clamp(2rem, 6vw, 5.25rem) clamp(1rem, 4vw, 4rem) 2rem;
+        background:
+          linear-gradient(90deg, rgba(251, 252, 253, 0.96) 0%, rgba(251, 252, 253, 0.76) 48%, rgba(251, 252, 253, 0.2) 100%),
+          url("https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1600&q=80") center/cover;
+        min-height: 560px;
+      }
+
+      .hero h1 {
+        max-width: 760px;
+        margin: 0;
+        font-size: clamp(2.4rem, 7vw, 5.4rem);
+        line-height: 0.98;
+        letter-spacing: 0;
+      }
+
+      .hero p {
+        max-width: 580px;
+        margin: 1.15rem 0 1.6rem;
+        color: #435062;
+        font-size: clamp(1rem, 2vw, 1.2rem);
+        line-height: 1.7;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+
+      .primary,
+      .secondary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 46px;
+        padding: 0 1rem;
+        border-radius: 8px;
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .primary {
+        border: 1px solid var(--brand);
+        color: white;
+        background: var(--brand);
+      }
+
+      .primary:hover {
+        background: var(--brand-dark);
+      }
+
+      .secondary {
+        border: 1px solid rgba(24, 32, 43, 0.18);
+        color: var(--ink);
+        background: rgba(255, 255, 255, 0.82);
+      }
+
+      .hero-panel {
+        align-self: stretch;
+        display: grid;
+        align-content: end;
+        min-height: 420px;
+      }
+
+      .deal {
+        width: min(360px, 100%);
+        margin-left: auto;
+        padding: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.64);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.88);
+        box-shadow: var(--shadow);
+      }
+
+      .deal img {
+        width: 100%;
+        aspect-ratio: 1.1 / 1;
+        object-fit: cover;
+        border-radius: 6px;
+      }
+
+      .deal-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: center;
+        margin-top: 0.9rem;
+      }
+
+      .deal strong {
+        display: block;
+        font-size: 1rem;
+      }
+
+      .deal span {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .price {
+        font-weight: 900;
+        color: var(--brand-dark);
+      }
+
+      .section {
+        padding: 2.75rem clamp(1rem, 4vw, 4rem);
+      }
+
+      .section-head {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .section-head h2 {
+        margin: 0;
+        font-size: clamp(1.5rem, 3vw, 2.35rem);
+        letter-spacing: 0;
+      }
+
+      .section-head p {
+        margin: 0.35rem 0 0;
+        color: var(--muted);
+      }
+
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+      }
+
+      .chip {
+        min-height: 38px;
+        padding: 0 0.85rem;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--ink);
+        background: white;
+        font-weight: 700;
+      }
+
+      .chip.active {
+        color: white;
+        border-color: var(--ink);
+        background: var(--ink);
+      }
+
+      .store-layout {
+        display: grid;
+        grid-template-columns: 250px minmax(0, 1fr);
+        gap: 1.25rem;
+        align-items: start;
+      }
+
+      .sidebar {
+        position: sticky;
+        top: 88px;
+        padding: 1rem;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+      }
+
+      .sidebar label {
+        display: block;
+        margin-bottom: 0.45rem;
+        color: var(--muted);
+        font-size: 0.86rem;
+        font-weight: 800;
+      }
+
+      .sidebar select,
+      .range-box {
+        width: 100%;
+        min-height: 42px;
+        margin-bottom: 1rem;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+      }
+
+      .sidebar select {
+        padding: 0 0.7rem;
+      }
+
+      .range-box {
+        padding: 0.8rem;
+      }
+
+      .range-box input {
+        width: 100%;
+        accent-color: var(--brand);
+      }
+
+      .range-values {
+        display: flex;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 0.86rem;
+      }
+
+      .shipping {
+        display: grid;
+        grid-template-columns: 34px 1fr;
+        gap: 0.7rem;
+        align-items: start;
+        padding: 0.85rem;
+        border-radius: 8px;
+        background: #eef8f7;
+      }
+
+      .shipping strong {
+        display: block;
+      }
+
+      .shipping span {
+        display: block;
+        margin-top: 0.15rem;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+      }
+
+      .product {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+        transition: transform 180ms ease, box-shadow 180ms ease;
+      }
+
+      .product:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 16px 34px rgba(24, 32, 43, 0.1);
+      }
+
+      .product-media {
+        position: relative;
+        background: #eef1f5;
+      }
+
+      .product img {
+        display: block;
+        width: 100%;
+        aspect-ratio: 1 / 0.86;
+        object-fit: cover;
+      }
+
+      .badge {
+        position: absolute;
+        top: 0.75rem;
+        left: 0.75rem;
+        padding: 0.35rem 0.55rem;
+        border-radius: 999px;
+        color: white;
+        background: var(--accent);
+        font-size: 0.75rem;
+        font-weight: 850;
+      }
+
+      .product-body {
+        padding: 0.95rem;
+      }
+
+      .product-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.75rem;
+      }
+
+      .product h3 {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .rating {
+        color: #9a6a00;
+        white-space: nowrap;
+        font-size: 0.9rem;
+      }
+
+      .product p {
+        min-height: 42px;
+        margin: 0.45rem 0 0.75rem;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .product-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+      }
+
+      .add {
+        min-height: 38px;
+        padding: 0 0.8rem;
+        border: 0;
+        border-radius: 8px;
+        color: white;
+        background: var(--ink);
+        font-weight: 800;
+      }
+
+      .add:hover {
+        background: var(--brand-dark);
+      }
+
+      .categories {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1rem;
+      }
+
+      .category {
+        position: relative;
+        overflow: hidden;
+        min-height: 180px;
+        border-radius: 8px;
+        color: white;
+        background: #222;
+      }
+
+      .category img {
+        width: 100%;
+        height: 100%;
+        min-height: 180px;
+        object-fit: cover;
+        filter: brightness(0.7);
+        transition: transform 200ms ease;
+      }
+
+      .category:hover img {
+        transform: scale(1.04);
+      }
+
+      .category span {
+        position: absolute;
+        left: 1rem;
+        bottom: 1rem;
+        font-size: 1.1rem;
+        font-weight: 900;
+      }
+
+      .newsletter {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 1rem;
+        align-items: center;
+        padding: 1.25rem;
+        border-radius: 8px;
+        color: white;
+        background: #10202f;
+      }
+
+      .newsletter h2 {
+        margin: 0;
+        font-size: 1.45rem;
+      }
+
+      .newsletter p {
+        margin: 0.35rem 0 0;
+        color: #bfd2dc;
+      }
+
+      .newsletter form {
+        display: flex;
+        gap: 0.6rem;
+        min-width: min(430px, 100%);
+      }
+
+      .newsletter input {
+        flex: 1;
+        min-height: 46px;
+        min-width: 0;
+        padding: 0 0.85rem;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 8px;
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+        outline: 0;
+      }
+
+      .newsletter input::placeholder {
+        color: #d6e1e8;
+      }
+
+      .newsletter button {
+        min-height: 46px;
+        padding: 0 1rem;
+        border: 0;
+        border-radius: 8px;
+        color: #10202f;
+        background: var(--gold);
+        font-weight: 900;
+      }
+
+      .footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1.3rem clamp(1rem, 4vw, 4rem);
+        color: var(--muted);
+        border-top: 1px solid var(--line);
+      }
+
+      @media (max-width: 980px) {
+        .nav {
+          grid-template-columns: 1fr auto;
+        }
+
+        .search {
+          grid-column: 1 / -1;
+          order: 3;
+        }
+
+        .hero {
+          grid-template-columns: 1fr;
+          min-height: auto;
+        }
+
+        .hero-panel {
+          min-height: 0;
+        }
+
+        .deal {
+          margin-left: 0;
+        }
+
+        .store-layout {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          position: static;
+        }
+
+        .grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .categories {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .newsletter {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .topbar {
+          font-size: 0.78rem;
+        }
+
+        .brand span {
+          display: none;
+        }
+
+        .cart-btn strong {
+          display: none;
+        }
+
+        .hero {
+          padding-top: 1.5rem;
+          background:
+            linear-gradient(180deg, rgba(251, 252, 253, 0.98) 0%, rgba(251, 252, 253, 0.78) 100%),
+            url("https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80") center/cover;
+        }
+
+        .section-head {
+          display: block;
+        }
+
+        .filters {
+          margin-top: 1rem;
+        }
+
+        .grid,
+        .categories {
+          grid-template-columns: 1fr;
+        }
+
+        .product p {
+          min-height: auto;
+        }
+
+        .newsletter form {
+          flex-direction: column;
+        }
+
+        .footer {
+          display: block;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const products = [
+        {
+          id: 1,
+          name: "Everyday Canvas Tote",
+          category: "Bags",
+          price: 42,
+          rating: 4.8,
+          tag: "Best seller",
+          image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=900&q=80",
+          description: "Structured cotton canvas with inner pockets and reinforced straps."
+        },
+        {
+          id: 2,
+          name: "Walnut Desk Lamp",
+          category: "Home",
+          price: 88,
+          rating: 4.7,
+          tag: "New",
+          image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=900&q=80",
+          description: "Warm dimmable light with a carved walnut base for focused evenings."
+        },
+        {
+          id: 3,
+          name: "Ridge Runner Sneakers",
+          category: "Shoes",
+          price: 96,
+          rating: 4.9,
+          tag: "Limited",
+          image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=80",
+          description: "Lightweight cushioning, grippy sole, and breathable knit upper."
+        },
+        {
+          id: 4,
+          name: "Linen Utility Jacket",
+          category: "Clothing",
+          price: 112,
+          rating: 4.6,
+          tag: "20% off",
+          image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=900&q=80",
+          description: "Easy layer with large patch pockets and a relaxed all-season fit."
+        },
+        {
+          id: 5,
+          name: "Stoneware Mug Set",
+          category: "Home",
+          price: 36,
+          rating: 4.8,
+          tag: "Gift pick",
+          image: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=900&q=80",
+          description: "Four hand-glazed mugs with a comfortable grip and matte finish."
+        },
+        {
+          id: 6,
+          name: "Minimal Travel Watch",
+          category: "Accessories",
+          price: 74,
+          rating: 4.5,
+          tag: "Low stock",
+          image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=900&q=80",
+          description: "Slim stainless case, clean dial, and a soft leather strap."
+        }
+      ];
+
+      const categories = [
+        {
+          title: "Modern Home",
+          image: "https://images.unsplash.com/photo-1513161455079-7dc1de15ef3e?auto=format&fit=crop&w=800&q=80"
+        },
+        {
+          title: "Daily Apparel",
+          image: "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=800&q=80"
+        },
+        {
+          title: "Travel Gear",
+          image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80"
+        },
+        {
+          title: "Work Essentials",
+          image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80"
+        }
+      ];
+
+      function App() {
+        const [activeCategory, setActiveCategory] = React.useState("All");
+        const [maxPrice, setMaxPrice] = React.useState(120);
+        const [sort, setSort] = React.useState("featured");
+        const [cartCount, setCartCount] = React.useState(0);
+        const [query, setQuery] = React.useState("");
+
+        const categoriesList = ["All", ...new Set(products.map((product) => product.category))];
+
+        const filteredProducts = products
+          .filter((product) => activeCategory === "All" || product.category === activeCategory)
+          .filter((product) => product.price <= maxPrice)
+          .filter((product) => product.name.toLowerCase().includes(query.toLowerCase()))
+          .sort((a, b) => {
+            if (sort === "price-low") return a.price - b.price;
+            if (sort === "price-high") return b.price - a.price;
+            if (sort === "rating") return b.rating - a.rating;
+            return a.id - b.id;
+          });
+
+        return (
+          <main className="app">
+            <div className="topbar">Free shipping over $75 · Easy 30-day returns · New summer pieces are live</div>
+
+            <nav className="nav" aria-label="Main navigation">
+              <div className="brand">
+                <div className="brand-mark" aria-hidden="true">T</div>
+                <span>Thread & Timber</span>
+              </div>
+
+              <label className="search">
+                <span aria-hidden="true">⌕</span>
+                <input
+                  type="search"
+                  placeholder="Search products"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                />
+              </label>
+
+              <div className="nav-actions">
+                <button className="icon-btn" type="button" title="Account" aria-label="Account">♡</button>
+                <button className="cart-btn" type="button" aria-label={`${cartCount} items in cart`}>
+                  <strong>Cart</strong>
+                  <span className="cart-count">{cartCount}</span>
+                </button>
+              </div>
+            </nav>
+
+            <section className="hero">
+              <div>
+                <h1>Better basics for busy days.</h1>
+                <p>
+                  Shop useful, well-made pieces for your wardrobe, desk, kitchen, and weekend bag.
+                  Everything here is chosen for everyday comfort and lasting style.
+                </p>
+                <div className="hero-actions">
+                  <a className="primary" href="#shop">Shop new arrivals</a>
+                  <a className="secondary" href="#categories">Browse collections</a>
+                </div>
+              </div>
+
+              <div className="hero-panel">
+                <article className="deal" aria-label="Featured deal">
+                  <img
+                    src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=800&q=80"
+                    alt="Folded casual clothing on a shelf"
+                  />
+                  <div className="deal-row">
+                    <div>
+                      <strong>Weekend layers edit</strong>
+                      <span>Curated outfits from $34</span>
+                    </div>
+                    <div className="price">Save 25%</div>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section className="section" id="categories">
+              <div className="section-head">
+                <div>
+                  <h2>Popular collections</h2>
+                  <p>Fast paths to the pieces customers keep coming back for.</p>
+                </div>
+              </div>
+
+              <div className="categories">
+                {categories.map((category) => (
+                  <article className="category" key={category.title}>
+                    <img src={category.image} alt={category.title} />
+                    <span>{category.title}</span>
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <section className="section" id="shop">
+              <div className="section-head">
+                <div>
+                  <h2>Shop the edit</h2>
+                  <p>{filteredProducts.length} products available</p>
+                </div>
+
+                <div className="filters" aria-label="Category filters">
+                  {categoriesList.map((category) => (
+                    <button
+                      className={`chip ${activeCategory === category ? "active" : ""}`}
+                      key={category}
+                      type="button"
+                      onClick={() => setActiveCategory(category)}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="store-layout">
+                <aside className="sidebar" aria-label="Shopping filters">
+                  <label htmlFor="sort">Sort by</label>
+                  <select id="sort" value={sort} onChange={(event) => setSort(event.target.value)}>
+                    <option value="featured">Featured</option>
+                    <option value="price-low">Price: low to high</option>
+                    <option value="price-high">Price: high to low</option>
+                    <option value="rating">Top rated</option>
+                  </select>
+
+                  <label htmlFor="price">Maximum price: ${maxPrice}</label>
+                  <div className="range-box">
+                    <input
+                      id="price"
+                      type="range"
+                      min="30"
+                      max="120"
+                      value={maxPrice}
+                      onChange={(event) => setMaxPrice(Number(event.target.value))}
+                    />
+                    <div className="range-values">
+                      <span>$30</span>
+                      <span>$120</span>
+                    </div>
+                  </div>
+
+                  <div className="shipping">
+                    <span aria-hidden="true">✓</span>
+                    <div>
+                      <strong>Ready to ship</strong>
+                      <span>Most orders leave our studio within 24 hours.</span>
+                    </div>
+                  </div>
+                </aside>
+
+                <div className="grid">
+                  {filteredProducts.map((product) => (
+                    <article className="product" key={product.id}>
+                      <div className="product-media">
+                        <img src={product.image} alt={product.name} />
+                        <span className="badge">{product.tag}</span>
+                      </div>
+                      <div className="product-body">
+                        <div className="product-top">
+                          <h3>{product.name}</h3>
+                          <div className="rating">★ {product.rating}</div>
+                        </div>
+                        <p>{product.description}</p>
+                        <div className="product-bottom">
+                          <div className="price">${product.price}</div>
+                          <button className="add" type="button" onClick={() => setCartCount(cartCount + 1)}>
+                            Add
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            <section className="section">
+              <div className="newsletter">
+                <div>
+                  <h2>Get first access to fresh drops.</h2>
+                  <p>New arrivals, restocks, and private sale notes sent once a week.</p>
+                </div>
+                <form onSubmit={(event) => event.preventDefault()}>
+                  <input type="email" placeholder="Email address" aria-label="Email address" />
+                  <button type="submit">Join</button>
+                </form>
+              </div>
+            </section>
+
+            <footer className="footer">
+              <span>© 2026 Thread & Timber</span>
+              <span>Secure checkout · Support · Privacy</span>
+            </footer>
+          </main>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+  </body>
+</html>
